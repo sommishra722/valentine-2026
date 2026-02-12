@@ -7,30 +7,48 @@
 <style>
 body {
   margin: 0;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #ffd6e0;
+  color: white;
+}
+
+/* Floating hearts */
+.heart {
+  position: fixed;
+  bottom: -20px;
+  font-size: 20px;
+  animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+  to {
+    transform: translateY(-110vh);
+    opacity: 0;
+  }
+}
+
+/* Main Card */
+.container {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #ffd6e0;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .card {
   background: white;
+  color: black;
   padding: 30px;
   border-radius: 20px;
   text-align: center;
   width: 320px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-}
-
-h1 {
-  font-size: 22px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
 
 .buttons {
   position: relative;
-  height: 150px;
+  height: 140px;
   margin-top: 20px;
 }
 
@@ -56,55 +74,195 @@ button {
   left: 20px;
   top: 20px;
 }
+
+/* Reveal Screen */
+.reveal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  color: white;
+}
+
+.blur-bg {
+  position: absolute;
+  inset: 0;
+  background: url('photo.jpg') center/cover no-repeat;
+  filter: blur(20px) brightness(0.6);
+  z-index: -2;
+}
+
+.photo {
+  width: 300px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.message {
+  font-size: 22px;
+  max-width: 300px;
+}
+
+.countdown {
+  margin-top: 10px;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* Error Screen */
+.error {
+  position: fixed;
+  inset: 0;
+  background: black;
+  color: #00ff88;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-family: monospace;
+  text-align: center;
+  font-size: 22px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>Ritika, will you be my Valentine? 💖</h1>
+<div class="container">
+  <div class="card">
+    <h2>Nirali, will you be my Valentine? 💖</h2>
 
-  <div class="buttons">
-    <button id="yes">Yes</button>
-    <button id="no">No</button>
+    <div class="countdown" id="countdown"></div>
+
+    <div class="buttons">
+      <button id="yes">Yes</button>
+      <button id="no">No</button>
+    </div>
   </div>
 </div>
 
+<div class="error" id="error">
+  <div>
+    ERROR 403<br>
+    Rejection not permitted.<br><br>
+    Please try again.
+  </div>
+</div>
+
+<div class="reveal" id="reveal">
+  <div class="blur-bg"></div>
+  <img src="photo.jpg" class="photo">
+  <div class="message" id="message"></div>
+  <div class="countdown" id="finalCountdown"></div>
+</div>
+
 <script>
+/* Floating Hearts */
+function createHeart() {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.innerHTML = "❤️";
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.animationDuration = (4 + Math.random() * 3) + "s";
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 7000);
+}
+setInterval(createHeart, 400);
+
+/* Countdown */
+const targetDate = new Date("February 14, 2026 19:30:00 GMT-0800");
+
+function updateCountdown() {
+  const now = new Date();
+  const diff = targetDate - now;
+
+  if (diff <= 0) return;
+
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff / (1000*60*60)) % 24);
+  const minutes = Math.floor((diff / (1000*60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  const text = `Dinner reservation in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+  document.getElementById("countdown").innerText = text;
+  document.getElementById("finalCountdown").innerText = text;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+/* No Button */
 const noBtn = document.getElementById("no");
-const container = document.querySelector(".buttons");
+noBtn.addEventListener("click", () => {
+  document.getElementById("error").style.display = "flex";
+  setTimeout(() => {
+    document.getElementById("error").style.display = "none";
+  }, 2000);
+});
 
-function moveButton() {
-  const maxX = container.clientWidth - noBtn.clientWidth;
-  const maxY = container.clientHeight - noBtn.clientHeight;
+/* Yes Button */
+document.getElementById("yes").addEventListener("click", () => {
+  confettiBurst();
+  document.querySelector(".container").style.display = "none";
+  document.getElementById("reveal").style.display = "flex";
+  typeMessage();
+});
 
-  const randX = Math.random() * maxX;
-  const randY = Math.random() * maxY;
+/* Typewriter */
+const lines = [
+  "I know this is a little dramatic…",
+  "But the last 7 months have been unbelievable with you.",
+  "Here's to a lifetime of romance ❤️"
+];
 
-  noBtn.style.left = randX + "px";
-  noBtn.style.top = randY + "px";
+function typeMessage() {
+  const el = document.getElementById("message");
+  let lineIndex = 0;
+  let charIndex = 0;
+
+  function type() {
+    if (lineIndex < lines.length) {
+      if (charIndex < lines[lineIndex].length) {
+        el.innerHTML += lines[lineIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(type, 40);
+      } else {
+        el.innerHTML += "<br><br>";
+        lineIndex++;
+        charIndex = 0;
+        setTimeout(type, 600);
+      }
+    }
+  }
+  type();
 }
 
-noBtn.addEventListener("mouseover", moveButton);
-noBtn.addEventListener("touchstart", moveButton);
+/* Confetti */
+function confettiBurst() {
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement("div");
+    confetti.style.position = "fixed";
+    confetti.style.width = "8px";
+    confetti.style.height = "8px";
+    confetti.style.background = `hsl(${Math.random()*360},100%,50%)`;
+    confetti.style.left = Math.random() * 100 + "vw";
+    confetti.style.top = "-10px";
+    confetti.style.opacity = 1;
+    document.body.appendChild(confetti);
 
-document.getElementById("yes").addEventListener("click", () => {
-  document.body.innerHTML = `
-    <div style="
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      font-size:26px;
-      background:#ffccd5;
-      text-align:center;
-      padding:20px;
-    ">
-      💕 BEST VALENTINE EVER 💕<br><br>
-      I love you ❤️
-    </div>
-  `;
-});
+    const fall = confetti.animate([
+      { transform: "translateY(0)" },
+      { transform: "translateY(100vh)" }
+    ], {
+      duration: 2000 + Math.random()*2000,
+      easing: "linear"
+    });
+
+    fall.onfinish = () => confetti.remove();
+  }
+}
 </script>
 
 </body>
