@@ -7,7 +7,7 @@
 <style>
 body {
   margin: 0;
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   background: #ffd6e0;
   color: white;
@@ -75,16 +75,17 @@ button {
   top: 20px;
 }
 
-/* Reveal Screen */
 .reveal {
   position: fixed;
   inset: 0;
   display: none;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
   text-align: center;
   color: white;
+  padding: 60px 20px 40px 20px;
+  overflow-y: auto;
 }
 
 .blur-bg {
@@ -96,7 +97,8 @@ button {
 }
 
 .photo {
-  width: 300px;
+  width: 280px;
+  max-width: 90%;
   border-radius: 20px;
   margin-bottom: 20px;
 }
@@ -132,7 +134,7 @@ button {
 
 <div class="container">
   <div class="card">
-    <h2>Nirali, will you be my Valentine? 💖</h2>
+    <h2>Ritika, will you be my Valentine? 💖</h2>
 
     <div class="countdown" id="countdown"></div>
 
@@ -185,7 +187,7 @@ function updateCountdown() {
   const minutes = Math.floor((diff / (1000*60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
 
-  const text = `Dinner reservation in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  const text = `Fogo de Chão time in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
 
   document.getElementById("countdown").innerText = text;
   document.getElementById("finalCountdown").innerText = text;
@@ -193,14 +195,31 @@ function updateCountdown() {
 setInterval(updateCountdown, 1000);
 updateCountdown();
 
-/* No Button */
+/* No Button Movement + Error */
 const noBtn = document.getElementById("no");
+const buttonsContainer = document.querySelector(".buttons");
+
+function moveNoButton() {
+  const maxX = buttonsContainer.clientWidth - noBtn.clientWidth;
+  const maxY = buttonsContainer.clientHeight - noBtn.clientHeight;
+
+  const randX = Math.random() * maxX;
+  const randY = Math.random() * maxY;
+
+  noBtn.style.left = randX + "px";
+  noBtn.style.top = randY + "px";
+}
+
+noBtn.addEventListener("mouseover", moveNoButton);
+noBtn.addEventListener("touchstart", moveNoButton);
+
 noBtn.addEventListener("click", () => {
   document.getElementById("error").style.display = "flex";
   setTimeout(() => {
     document.getElementById("error").style.display = "none";
   }, 2000);
 });
+
 
 /* Yes Button */
 document.getElementById("yes").addEventListener("click", () => {
